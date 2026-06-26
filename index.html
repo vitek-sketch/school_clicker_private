@@ -1,179 +1,46 @@
-<!--
-School Clicker 2.0 Beta 1.3 - Změny a opravy
-- Odebrán Dev Mode (tlačítko a funkce).
-- Přidán 4. svět „Práce“ s novými upgrady.
-- Připraven slot pro 5. svět (zatím bez obsahu).
-- Nové ovládání světů: zadání ID, šipky, zobrazení odemčených světů.
-- Oprava časově omezených boostů:
-  • Při zakoupení stejného boostu se prodlužuje doba (místo násobení).
-  • Silnější boost přepíše slabší aktivní (slabší zakoupené se ignorují).
-- Boosty se nemnoží do nekonečna (dvojnásobení bez konce).
-- Opravené ukládání a čtení save (přidány verze, migrace starých save přidá nové světy).
-- Přidán export/import a reset save pro testování.
-- Číselný formát: od 1×10¹² se přepíná na vědecký zápis (např. 2.5×10¹²).
--->
 <!DOCTYPE html>
 <html lang="cs">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>School Clicker 2.0 Clean Edition</title>
+<title>School Clicker Beta 1.3</title>
 <style>
-:root{
-  --bg1:#8ec5fc;
-  --bg2:#e0c3fc;
-  --card:rgba(255,255,255,0.92);
-  --shadow:0 6px 18px rgba(0,0,0,0.15);
-  --green:#43a047;
-  --green2:#2e7d32;
-  --text:#1f2937;
-  --muted:#5b6472;
-  --line:#e5e7eb;
-  --accent:#4caf50;
-  --warn:#ffb703;
-}
-
+/* (Styly zůstávají beze změny) */
+:root{ --bg1:#8ec5fc; --bg2:#e0c3fc; --card:rgba(255,255,255,0.92); --shadow:0 6px 18px rgba(0,0,0,0.15); --green:#43a047; --green2:#2e7d32; --text:#1f2937; --muted:#5b6472; --line:#e5e7eb; --accent:#4caf50; --warn:#ffb703; }
 *{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:Segoe UI,Arial,sans-serif;
-  background:linear-gradient(135deg,var(--bg1),var(--bg2));
-  color:var(--text);
-}
-
+body{ margin:0; font-family:Segoe UI,Arial,sans-serif; background:linear-gradient(135deg,var(--bg1),var(--bg2)); color:var(--text); }
 .container{max-width:1080px;margin:auto;padding:12px}
-.card{
-  background:var(--card);
-  border-radius:18px;
-  padding:14px;
-  box-shadow:var(--shadow);
-  margin-bottom:10px;
-}
-.top{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-.panel{
-  font-size:18px;
-  font-weight:700;
-}
-.hero{
-  text-align:center;
-  margin:10px 0 6px;
-}
-.clickbtn{
-  width:150px;
-  height:150px;
-  border:none;
-  border-radius:50%;
-  font-size:28px;
-  font-weight:800;
-  color:white;
-  cursor:pointer;
-  background:linear-gradient(135deg,var(--green),var(--green2));
-  box-shadow:0 10px 20px rgba(46,125,50,0.25);
-}
+.card{ background:var(--card); border-radius:18px; padding:14px; box-shadow:var(--shadow); margin-bottom:10px; }
+.top{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.panel{ font-size:18px; font-weight:700; }
+.hero{ text-align:center; margin:10px 0 6px; }
+.clickbtn{ width:150px; height:150px; border:none; border-radius:50%; font-size:28px; font-weight:800; color:white; cursor:pointer; background:linear-gradient(135deg,var(--green),var(--green2)); box-shadow:0 10px 20px rgba(46,125,50,0.25); }
 .clickbtn:active{transform:scale(0.97)}
-.grid{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:10px;
-}
-.shopbtn, .worldbtn, .smallbtn, .gembtn, .unlockbtn{
-  width:100%;
-  padding:11px 12px;
-  margin:4px 0;
-  border:none;
-  border-radius:12px;
-  cursor:pointer;
-  font-weight:700;
-  background:#f3f4f6;
-}
-.shopbtn:hover,.worldbtn:hover,.smallbtn:hover,.gembtn:hover,.unlockbtn:hover{
-  filter:brightness(0.98);
-}
-.shopbtn:disabled,.worldbtn:disabled,.smallbtn:disabled,.gembtn:disabled,.unlockbtn:disabled{
-  opacity:0.55;
-  cursor:not-allowed;
-}
-.progress{
-  height:20px;
-  background:#ddd;
-  border-radius:20px;
-  overflow:hidden;
-}
-.fill{
-  height:100%;
-  background:var(--accent);
-  width:0%;
-  transition:width 0.2s ease;
-}
-.progress-row{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  flex-wrap:wrap;
-}
-.progress-label{
-  flex:1 1 220px;
-  min-width:200px;
-}
-.muted{color:var(--muted)}
-.section-title{
-  margin:0 0 10px;
-}
-.badge{
-  display:inline-block;
-  padding:3px 8px;
-  border-radius:999px;
-  background:#eef2ff;
-  font-size:12px;
-  margin-left:6px;
-}
-#eventMsg{
-  min-height:48px;
-  display:none;
-  text-align:center;
-  font-weight:700;
-}
-#ending1, #ending2{
-  display:none;
-  border-left:6px solid var(--accent);
-}
-#boostList{
-  display:grid;
-  gap:8px;
-}
-.boost-item{
-  background:#f8fafc;
-  border:1px solid var(--line);
-  border-radius:12px;
-  padding:10px 12px;
-}
-.world-card{
-  border:1px solid var(--line);
-  border-radius:12px;
-  padding:10px 12px;
-  background:#fafafa;
-}
-.world-card.active{
-  border-color:#60a5fa;
-  background:#eff6ff;
-}
-.world-card.locked{
-  opacity:0.75;
-}
-.world-card h4{
-  margin:0 0 6px;
-}
-.world-card p{
-  margin:4px 0;
-}
-
+.grid{ display:grid; grid-template-columns:1fr; gap:10px; }
+.shopbtn, .worldbtn, .smallbtn, .gembtn, .unlockbtn{ width:100%; padding:11px 12px; margin:4px 0; border:none; border-radius:12px; cursor:pointer; font-weight:700; background:#f3f4f6; }
+.shopbtn:hover, .worldbtn:hover, .smallbtn:hover, .gembtn:hover, .unlockbtn:hover{ filter:brightness(0.98); }
+.shopbtn:disabled, .worldbtn:disabled, .smallbtn:disabled, .gembtn:disabled, .unlockbtn:disabled{ opacity:0.55; cursor:not-allowed; }
+.progress{ height:20px; background:#ddd; border-radius:20px; overflow:hidden; }
+.fill{ height:100%; background:var(--accent); width:0%; transition:width 0.2s ease; }
+.progress-row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.progress-label{ flex:1 1 220px; min-width:200px; }
+.muted{ color:var(--muted); }
+.section-title{ margin:0 0 10px; }
+.badge{ display:inline-block; padding:3px 8px; border-radius:999px; background:#eef2ff; font-size:12px; margin-left:6px; }
+#eventMsg{ min-height:48px; display:none; text-align:center; font-weight:700; }
+#ending1, #ending2{ display:none; border-left:6px solid var(--accent); }
+#boostList{ display:grid; gap:8px; }
+.boost-item{ background:#f8fafc; border:1px solid var(--line); border-radius:12px; padding:10px 12px; }
+.world-grid{ display:grid; grid-template-columns:1fr; gap:8px; }
+.world-card{ border:1px solid var(--line); border-radius:12px; padding:10px 12px; background:#fafafa; }
+.world-card.active{ border-color:#60a5fa; background:#eff6ff; }
+.world-card.locked{ opacity:0.75; }
+.world-card h4{ margin:0 0 6px; }
+.world-card p{ margin:4px 0; }
 @media (min-width:720px){
-  .grid{grid-template-columns:1.2fr 0.9fr 0.7fr}
-  .clickbtn{width:160px;height:160px;font-size:30px}
+  .grid{grid-template-columns:1.2fr 0.9fr 0.7fr;}
+  .world-grid{grid-template-columns:repeat(3,1fr);}
+  .clickbtn{width:160px;height:160px;font-size:30px;}
 }
 </style>
 </head>
@@ -194,7 +61,7 @@ body{
   <div class="card hero">
     <h2 id="worldTitle">🏫 Škola (1. svět)</h2>
     <button class="clickbtn" onclick="clickMoney()">CLICK</button>
-    <div class="muted" style="margin-top:8px">Klikem vyděláváš podle click power.</div>
+    <div class="muted" style="margin-top:8px">Klikem vyděláváš podle Click Power.</div>
   </div>
 
   <div class="card">
@@ -214,15 +81,8 @@ body{
 
   <div class="card">
     <h3 class="section-title">🌍 Světy</h3>
-    <div>
-      Aktuální svět: <span id="currentWorldDisplay"></span><br>
-      <button class="smallbtn" onclick="prevWorld()" style="width:30px;">←</button>
-      <button class="smallbtn" onclick="nextWorld()" style="width:30px;">→</button><br>
-      <input type="number" id="worldInput" min="1" max="5" style="width:60px;">
-      <button class="smallbtn" onclick="gotoWorld()">Přepnout</button><br>
-      <div id="unlockedWorlds" class="muted" style="margin-top:8px">Odemčeno: 1</div>
-    </div>
-    <div class="muted" style="margin-top:8px">Všechny upgrady a ceny jsou uložené pro každý svět zvlášť.</div>
+    <div class="world-grid" id="worldControls"></div>
+    <div class="muted" style="margin-top:8px">Všechny upgrady a ceny jsou uloženy zvlášť pro každý svět.</div>
   </div>
 
   <div class="grid">
@@ -233,21 +93,26 @@ body{
 
     <div class="card">
       <h3 class="section-title">💎 Gem Shop</h3>
+      <p class="muted">Můžeš přeskočit čas nebo získat různé boosty.</p>
       <div id="gemShop"></div>
     </div>
 
     <div class="card">
       <h3 class="section-title">📊 Statistiky</h3>
       <p>Kč/s: <span id="perSec">0</span></p>
+      <p>Celkem vyděláno: <span id="totalEarned">0</span></p>
+      <p>Celkem kliků: <span id="totalClicks">0</span></p>
+      <p>Nejvíc Kč: <span id="bestMoney">0</span></p>
       <p>Click Power: <span id="clickPower">1</span></p>
       <p>Boost: <span id="boostText">x1</span></p>
+      <div id="boostList" style="margin-top:8px;"></div>
     </div>
   </div>
 
   <div class="card" id="ending1">
     <h3>🏆 Ending 1 – Splacený dluh</h3>
     <p>Zaplatil jsi škole všechny škody způsobené pranky. Ředitel ti konečně odpustil.</p>
-    <p class="muted">Nový cíl: 10 000 000 000 Kč</p>
+    <p class="muted">Nový cíl: 10 000 000 000 Kč</p>
   </div>
 
   <div class="card" id="ending2">
@@ -260,17 +125,9 @@ body{
     <h3 class="section-title">⭐ Prestige</h3>
     <p>Prestige Level: <span id="prestigeLevel">0</span></p>
     <p>Cash Multiplier: <span id="prestigeCash">x1</span></p>
+    <p>Příští Prestige: <span id="prestigeCost">–</span> Kč</p>
     <button class="smallbtn" onclick="buyPrestige()">Provést Prestige</button>
     <div id="prestigeInfo" class="muted"></div>
-  </div>
-
-  <div class="card">
-    <h3 class="section-title">⚙️ Testovací nástroje</h3>
-    <button class="smallbtn" onclick="resetSave()">Reset save</button>
-    <button class="smallbtn" onclick="exportSave()">Export save</button><br>
-    <textarea id="importArea" placeholder="Vlož JSON pro import..." style="width:100%;height:50px;margin-top:5px;"></textarea>
-    <button class="smallbtn" onclick="importSave()">Import save</button>
-    <p class="muted">Pokročilé testovací nástroje.</p>
   </div>
 
 </div>
@@ -322,30 +179,23 @@ body{
       ]
     },
     4: {
-      title: "💼 Práce (4. svět)",
-      unlockCost: 100000000,
-      endingGoal: 100000000000,
+      title: "⚙️ Práce (4. svět)",
+      unlockCost: 10_000_000_000,
+      endingGoal: 1_000_000_000_000,
       upgrades: [
-        { id: "sesivacka", label: "Sešívačka +10/s", baseCost: 100000, effect: { perSecond: 10 } },
-        { id: "propustka", label: "Propustka +20/c", baseCost: 250000, effect: { clickPower: 20 } },
-        { id: "sanon", label: "Šanon papírů +100/s", baseCost: 1000000, effect: { perSecond: 100 } },
-        { id: "dovolena", label: "Dovolená +500/s", baseCost: 5000000, effect: { perSecond: 500 } },
-        { id: "koktejl", label: "Koktejl +200/c", baseCost: 20000000, effect: { clickPower: 200 } },
-        { id: "zamestnanec", label: "Zaměstnanec +2000/s", baseCost: 50000000, effect: { perSecond: 2000 } },
-        { id: "povyseni", label: "Povýšení +10000/s", baseCost: 200000000, effect: { perSecond: 10000 } }
+        { id: "sesivacka", label: "Sešívačka +1000/s", baseCost: 1_000_000, effect: { perSecond: 1000 } },
+        { id: "propustka", label: "Propustka +500/c", baseCost: 5_000_000, effect: { clickPower: 500 } },
+        { id: "sanon", label: "Šanon papírů +10 000/s", baseCost: 20_000_000, effect: { perSecond: 10000 } },
+        { id: "dovolena", label: "Dovolená +1 000/c", baseCost: 100_000_000, effect: { clickPower: 1000 } },
+        { id: "koktejl", label: "Koktejl +15 000/s", baseCost: 500_000_000, effect: { perSecond: 15000 } },
+        { id: "zamestnanec", label: "Zaměstnanec +5 000/c", baseCost: 2_000_000_000, effect: { clickPower: 5000 } },
+        { id: "povyseni", label: "Povýšení +100 000/s", baseCost: 10_000_000_000, effect: { perSecond: 100000 } }
       ]
-    },
-    5: {
-      title: "🔒 Pátý svět",
-      unlockCost: 1000000000000,
-      endingGoal: 0,
-      upgrades: []
     }
   };
 
   const defaultWorldState = (worldId) => {
-    const costs = {};
-    const owned = {};
+    const costs = {}, owned = {};
     for (const u of WORLD_DEFS[worldId].upgrades) {
       costs[u.id] = u.baseCost;
       owned[u.id] = 0;
@@ -360,135 +210,97 @@ body{
     perSecond: 0,
     boost: 1,
     gemLuck: 1,
-    version: 2,
-    activeBoosts: [],
-    activeGemBoost: null,
+    cashBoostActive: null,  // pro Cash boost
+    gemLuckActive: null,    // pro Gem Luck boost
     currentWorld: 1,
     maxUnlockedWorld: 1,
     endings: { ending1: false, ending2: false },
-    stats: { clicks: 0, gemsFound: 0, tests: 0, parties: 0 },
+    stats: { clicks: 0, totalEarned: 0, maxMoney: 0, gemsFound: 0, tests: 0, parties: 0 },
     prestige: 0,
     prestigeCash: 1,
     worlds: {
       1: defaultWorldState(1),
       2: defaultWorldState(2),
       3: defaultWorldState(3),
-      4: defaultWorldState(4),
-      5: defaultWorldState(5)
+      4: defaultWorldState(4)
     }
   });
 
-  let state = loadState();
-
+  // Načtení stavu ze storage, případná migrace starého formátu
   function loadState() {
-    const raw = localStorage.getItem(SAVE_KEY);
     let loaded = null;
     try {
+      const raw = localStorage.getItem(SAVE_KEY);
       loaded = raw ? JSON.parse(raw) : null;
-    } catch {
+    } catch (e) {
       loaded = null;
     }
+    const s = (loaded && typeof loaded === "object") ? loaded : defaultState();
 
-    const s = loaded && typeof loaded === "object" ? loaded : defaultState();
-
-    // Migrate old saves to version 2 (add world4 and 5)
-    if (!s.version || s.version < 2) {
-      if (!s.worlds) s.worlds = {};
-      if (!s.worlds[4]) s.worlds[4] = defaultWorldState(4);
-      if (!s.worlds[5]) s.worlds[5] = defaultWorldState(5);
-      s.version = 2;
-    }
-
-    // Normalize top-level values
+    // Normalizace a doplnění chybějících položek (pro zpětnou kompatibilitu)
     s.money = Number(s.money) || 0;
     s.gems = Number(s.gems) || 0;
     s.clickPower = Number(s.clickPower) || 1;
     s.perSecond = Number(s.perSecond) || 0;
     s.boost = Number(s.boost) || 1;
     s.gemLuck = Number(s.gemLuck) || 1;
-    s.currentWorld = [1,2,3,4,5].includes(Number(s.currentWorld)) ? Number(s.currentWorld) : 1;
-    s.maxUnlockedWorld = [1,2,3,4,5].includes(Number(s.maxUnlockedWorld)) ? Number(s.maxUnlockedWorld) : 1;
-    s.prestige = Number(s.prestige)||0;
-    s.prestigeCash = Number(s.prestigeCash)||1;
-
+    s.cashBoostActive = s.cashBoostActive || null;
+    s.gemLuckActive = s.gemLuckActive || null;
+    s.currentWorld = [1,2,3,4].includes(Number(s.currentWorld)) ? Number(s.currentWorld) : 1;
+    s.maxUnlockedWorld = [1,2,3,4].includes(Number(s.maxUnlockedWorld)) ? Number(s.maxUnlockedWorld) : 1;
+    s.prestige = Number(s.prestige) || 0;
+    s.prestigeCash = Number(s.prestigeCash) || 1;
     s.endings = s.endings && typeof s.endings === "object" ? s.endings : { ending1:false, ending2:false };
     s.endings.ending1 = !!s.endings.ending1;
     s.endings.ending2 = !!s.endings.ending2;
-
-    s.stats = s.stats && typeof s.stats === "object" ? s.stats : { clicks:0, gemsFound:0, tests:0, parties:0 };
+    s.stats = s.stats && typeof s.stats === "object" ? s.stats : { clicks:0, totalEarned:0, maxMoney:0, gemsFound:0, tests:0, parties:0 };
     s.stats.clicks = Number(s.stats.clicks) || 0;
+    s.stats.totalEarned = Number(s.stats.totalEarned) || 0;
+    s.stats.maxMoney = Number(s.stats.maxMoney) || 0;
     s.stats.gemsFound = Number(s.stats.gemsFound) || 0;
     s.stats.tests = Number(s.stats.tests) || 0;
     s.stats.parties = Number(s.stats.parties) || 0;
-
-    s.activeBoosts = Array.isArray(s.activeBoosts) ? s.activeBoosts : [];
-    s.activeGemBoost = (s.activeGemBoost && typeof s.activeGemBoost === "object") ? s.activeGemBoost : null;
-
     s.worlds = s.worlds && typeof s.worlds === "object" ? s.worlds : {};
-    for (const worldId of [1,2,3,4,5]) {
+    for (const worldId of [1,2,3,4]) {
       if (!s.worlds[worldId]) s.worlds[worldId] = defaultWorldState(worldId);
       if (!s.worlds[worldId].costs) s.worlds[worldId].costs = {};
       if (!s.worlds[worldId].owned) s.worlds[worldId].owned = {};
       for (const u of WORLD_DEFS[worldId].upgrades) {
-        if (typeof s.worlds[worldId].costs[u.id] !== "number" || !isFinite(s.worlds[worldId].costs[u.id])) {
+        if (typeof s.worlds[worldId].costs[u.id] !== "number") {
           s.worlds[worldId].costs[u.id] = u.baseCost;
         }
-        if (typeof s.worlds[worldId].owned[u.id] !== "number" || !isFinite(s.worlds[worldId].owned[u.id])) {
+        if (typeof s.worlds[worldId].owned[u.id] !== "number") {
           s.worlds[worldId].owned[u.id] = 0;
         }
       }
     }
-
-    purgeExpiredBoosts(s);
     if (s.currentWorld > s.maxUnlockedWorld) s.currentWorld = s.maxUnlockedWorld;
-
     return s;
   }
 
-  function purgeExpiredBoosts(s = state) {
-    const now = Date.now();
-    s.activeBoosts = (s.activeBoosts || []).filter(b => b && Number(b.expiresAt) > now && Number(b.mult) > 0);
-    s.boost = s.activeBoosts.reduce((prod, b) => prod * Number(b.mult), 1);
-    // Update gemLuck from activeGemBoost
-    if (s.activeGemBoost && Number(s.activeGemBoost.expiresAt) <= now) {
-      s.activeGemBoost = null;
-    }
-    s.gemLuck = s.activeGemBoost ? s.activeGemBoost.mult : 1;
-  }
+  let state = loadState();
 
+  // Uloží stav do localStorage
   function saveState() {
     localStorage.setItem(SAVE_KEY, JSON.stringify(state));
   }
 
+  // Formát čísel: do 1e12 normálně, nad 1e12 ve vědecké notaci
   function fmt(n) {
     n = Number(n) || 0;
     if (n < 1e12) {
       return Math.floor(n).toLocaleString("cs-CZ");
-    } else {
-      const exponent = Math.floor(Math.log10(n));
-      let base = n / Math.pow(10, exponent);
-      let formattedBase = base.toFixed(2);
-      // Remove trailing zeros
-      formattedBase = formattedBase.replace(/\.0+$/, "").replace(/\.(\d)0$/, ".$1");
-      // Superscript digits for exponent
-      const supers = {0:'⁰',1:'¹',2:'²',3:'³',4:'⁴',5:'⁵',6:'⁶',7:'⁷',8:'⁸',9:'⁹'};
-      const expStr = exponent.toString().split('').map(d => supers[d] || '').join('');
-      return formattedBase + "×10" + expStr;
     }
+    const exp = Math.floor(Math.log10(n));
+    const mant = (n / Math.pow(10, exp)).toFixed(2);
+    // Převeď exponent do horních číslic
+    let expStr = String(exp).split("").map(d => {
+      return {"0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹"}[d] || "";
+    }).join("");
+    return `${mant}×10${expStr}`;
   }
 
-  function currentWorld() {
-    return WORLD_DEFS[state.currentWorld];
-  }
-
-  function worldData(worldId = state.currentWorld) {
-    return state.worlds[worldId];
-  }
-
-  function currentGoal() {
-    return state.endings.ending1 ? WORLD_DEFS[3].endingGoal : WORLD_DEFS[1].endingGoal;
-  }
-
+  // Pomocná funkce pro zobrazení zprávy hráči
   function showMessage(text) {
     const el = document.getElementById("eventMsg");
     el.style.display = "block";
@@ -497,42 +309,71 @@ body{
     showMessage._timer = setTimeout(() => {
       el.style.display = "none";
       el.textContent = "";
-    }, 4500);
+    }, 3000);
   }
 
+  // Aktualizace statistik na obrazovce
   function updateStats() {
     document.getElementById("money").textContent = fmt(state.money);
     document.getElementById("gems").textContent = fmt(state.gems);
     document.getElementById("perSec").textContent = fmt(state.perSecond * state.boost);
     document.getElementById("clickPower").textContent = fmt(state.clickPower);
     document.getElementById("boostText").textContent = "x" + fmt(state.boost);
+    document.getElementById("totalEarned").textContent = fmt(state.stats.totalEarned);
+    document.getElementById("totalClicks").textContent = fmt(state.stats.clicks);
+    document.getElementById("bestMoney").textContent = fmt(state.stats.maxMoney);
+
     document.getElementById("paid").textContent = fmt(state.money);
-    if(document.getElementById("prestigeLevel")) document.getElementById("prestigeLevel").textContent=state.prestige;
-    if(document.getElementById("prestigeCash")) document.getElementById("prestigeCash").textContent="x"+state.prestigeCash;
-
-    const goal = currentGoal();
+    const goal = (state.endings.ending1 ? WORLD_DEFS[3] : WORLD_DEFS[state.currentWorld]).endingGoal;
     document.getElementById("goalLabel").textContent =
-      state.endings.ending1 ? "Cíl: 10 000 000 000 Kč" : "Cíl: 10 000 000 Kč";
+      state.endings.ending1 ? "Cíl: 10 000 000 000 Kč" : `Cíl: ${fmt(goal)} Kč`;
     document.getElementById("fill").style.width = Math.min((state.money / goal) * 100, 100) + "%";
-
-    document.getElementById("worldTitle").textContent = currentWorld().title;
-    document.getElementById("upgradeTitle").textContent = `📚 Upgrades (${currentWorld().title.split(" ").slice(-1)[0].replace("(", "").replace(")", "")})`;
-
-    // Update world selector display
-    document.getElementById("currentWorldDisplay").textContent = state.currentWorld;
-    const unlocked = [];
-    for (let i = 1; i <= state.maxUnlockedWorld; i++) unlocked.push(i);
-    document.getElementById("unlockedWorlds").textContent = "Odemčeno: " + unlocked.join(",");
+    document.getElementById("worldTitle").textContent = WORLD_DEFS[state.currentWorld].title;
+    document.getElementById("upgradeTitle").textContent =
+      `📚 Upgrades (${WORLD_DEFS[state.currentWorld].title.split(" ")[1]})`;
 
     document.getElementById("ending1").style.display = state.endings.ending1 ? "block" : "none";
     document.getElementById("ending2").style.display = state.endings.ending2 ? "block" : "none";
+
+    // Aktualizace ceny příštího Prestige
+    const nextCost = PRESTIGE_COSTS[state.prestige] || 0;
+    document.getElementById("prestigeCost").textContent = nextCost ? fmt(nextCost) : "–";
   }
 
+  // Vykreslení panelu světů
+  function renderWorldControls() {
+    const c = document.getElementById("worldControls");
+    c.innerHTML = "";
+    for (const worldId of [1,2,3,4]) {
+      const def = WORLD_DEFS[worldId];
+      const unlocked = worldId <= state.maxUnlockedWorld;
+      const isCurrent = worldId === state.currentWorld;
+      const cost = def.unlockCost;
+      const nextWorldAllowed = (worldId === state.maxUnlockedWorld + 1) || unlocked;
+      let label = "", sub = "";
+      if (unlocked) {
+        label = isCurrent ? "Aktivní" : "Přepnout";
+        sub = "Odemčeno";
+      } else {
+        label = `Odemknout svět ${worldId}`;
+        sub = `${fmt(state.money)} / ${fmt(cost)} Kč`;
+      }
+      const pct = unlocked ? 100 : Math.min((state.money / cost) * 100, 100);
+      c.innerHTML += `
+        <div class="world-card ${isCurrent ? "active" : ""} ${unlocked ? "" : "locked"}">
+          <h4>${def.title}</h4>
+          <p>${sub}</p>
+          <div class="progress" style="margin:8px 0 10px"><div class="fill" style="width:${pct}%"></div></div>
+          <button class="worldbtn" ${nextWorldAllowed ? "" : "disabled"} onclick="handleWorldButton(${worldId})">${label}</button>
+        </div>`;
+    }
+  }
+
+  // Vykreslení obchodů
   function renderShop() {
     const shop = document.getElementById("shop");
-    const w = worldData();
+    const w = state.worlds[state.currentWorld];
     shop.innerHTML = "";
-
     for (const u of WORLD_DEFS[state.currentWorld].upgrades) {
       const cost = w.costs[u.id];
       const owned = w.owned[u.id] || 0;
@@ -545,6 +386,7 @@ body{
     }
   }
 
+  // Vykreslení Gem Shopu (statické položky)
   function renderGemShop() {
     const gs = document.getElementById("gemShop");
     gs.innerHTML = `
@@ -553,109 +395,131 @@ body{
       <button class="gembtn" onclick="buyTimeSkip(600,12)">10 min skip - 12💎</button>
       <button class="gembtn" onclick="buyTimeSkip(1800,20)">30 min skip - 20💎</button>
       <hr>
-      <button class="gembtn" onclick="buyBoost(2,180,10)">2x Cash 3 min - 10💎</button>
-      <button class="gembtn" onclick="buyBoost(3,120,15)">3x Cash 2 min - 15💎</button>
+      <button class="gembtn" onclick="buyBoost(2,180,10)">2× Cash 3 min - 10💎</button>
+      <button class="gembtn" onclick="buyBoost(3,120,15)">3× Cash 2 min - 15💎</button>
       <hr>
-      <button class="gembtn" onclick="buyGemLuck(10,180,20)">10x Gem Luck 3 min - 20💎</button>
-      <button class="gembtn" onclick="buyGemLuck(20,90,30)">20x Gem Luck 1.5 min - 30💎</button>
-    `;
+      <button class="gembtn" onclick="buyGemLuck(10,180,20)">10× Luck 3 min - 20💎</button>
+      <button class="gembtn" onclick="buyGemLuck(20,90,30)">20× Luck 1.5 min - 30💎</button>`;
   }
 
+  // Zobrazení aktivních boostů
   function renderBoosts() {
-    // Keep boost clean after expired entries
     const boostList = document.getElementById("boostList");
-    if (!boostList) return;
     boostList.innerHTML = "";
     const now = Date.now();
-    const active = (state.activeBoosts || []).filter(b => Number(b.expiresAt) > now);
+    // Seznam cash i luck boostů
+    const active = [];
+    if (state.cashBoostActive && state.cashBoostActive.expiresAt > now) {
+      active.push({mult: state.cashBoostActive.mult, expiresAt: state.cashBoostActive.expiresAt});
+    }
+    if (state.gemLuckActive && state.gemLuckActive.expiresAt > now) {
+      active.push({mult: state.gemLuckActive.mult, expiresAt: state.gemLuckActive.expiresAt});
+    }
     if (!active.length) {
       boostList.innerHTML = `<div class="boost-item muted">Žádné aktivní boosty.</div>`;
       return;
     }
     active.sort((a,b) => a.expiresAt - b.expiresAt).forEach(b => {
       const left = Math.max(0, Math.ceil((b.expiresAt - now)/1000));
-      boostList.innerHTML += `<div class="boost-item">x${fmt(b.mult)} boost · zbývá ${left}s</div>`;
+      boostList.innerHTML += `<div class="boost-item">x${b.mult} boost · zbývá ${left}s</div>`;
     });
-    // Optionally, show gem luck boost similarly if active
   }
 
+  // Kontrola splnění cílů (endingů)
   function checkEndings() {
-    if (!state.endings.ending1 && state.money >= 10_000_000) {
+    if (!state.endings.ending1 && state.money >= WORLD_DEFS[1].endingGoal) {
       state.endings.ending1 = true;
-      showMessage("🏆 Ending 1: Splatil jsi dluh škole!");
-    } else if (state.endings.ending1 && !state.endings.ending2 && state.money >= 10_000_000_000) {
+      showMessage("🏆 Ending 1: Dluh splacen!");
+    }
+    if (state.endings.ending1 && !state.endings.ending2 && state.money >= WORLD_DEFS[4].endingGoal) {
       state.endings.ending2 = true;
       showMessage("🌙 Ending 2: Koupil sis měsíční vilu!");
     }
   }
 
+  // Hlavní update (přepočítávání hodnot + uložení)
   function update() {
-    purgeExpiredBoosts();
+    // Aktualizovat statistiky a UI
     updateStats();
-    renderShop();
-    renderGemShop();
+    renderWorldControls();
     renderBoosts();
     checkEndings();
     saveState();
   }
 
+  // Při prvním spuštění
+  renderGemShop();   // statické položky se vykreslí jednou
+  renderWorldControls();
+  renderShop();
+  update();
+
+  // Přepínání / odemykání světů
   function handleWorldButton(worldId) {
     if (worldId <= state.maxUnlockedWorld) {
+      // přepni svět
       state.currentWorld = worldId;
+      renderWorldControls();
+      renderShop();
       update();
       return;
     }
-
-    const prevNeeded = worldId === 2 ? 1 : 2;
+    const prevNeeded = worldId - 1;
     if (state.maxUnlockedWorld < prevNeeded) {
-      showMessage(worldId === 3 ? "Nejdřív odemkni svět 2." : "Nejdřív musíš mít svět 1.");
+      showMessage(`Nejdřív odemkni svět ${prevNeeded}.`);
       return;
     }
-
     const cost = WORLD_DEFS[worldId].unlockCost;
     if (state.money < cost) {
-      showMessage(`Potřebuješ ${fmt(cost)} Kč na odemčení.`);
+      showMessage(`Potřebuješ ${fmt(cost)} Kč na odemčení světa ${worldId}.`);
       return;
     }
-
+    // Odemkni nový svět
     state.money -= cost;
     state.maxUnlockedWorld = worldId;
     state.currentWorld = worldId;
     showMessage(`🌍 Odemčen svět ${worldId}!`);
+    renderWorldControls();
+    renderShop();
     update();
   }
 
+  // Aplikace efektu upgradu
   function applyUpgradeEffect(effect) {
     if (effect.clickPower) state.clickPower += effect.clickPower;
     if (effect.perSecond) state.perSecond += effect.perSecond;
     if (effect.perSecondDelta) state.perSecond = Math.max(0, state.perSecond + effect.perSecondDelta);
   }
 
+  // Nákup upgradu
   function buyUpgrade(upgradeId) {
-    const w = worldData();
+    const w = state.worlds[state.currentWorld];
     const def = WORLD_DEFS[state.currentWorld].upgrades.find(u => u.id === upgradeId);
     if (!def) return;
-
     const cost = w.costs[upgradeId];
     if (state.money < cost) return;
-
     state.money -= cost;
     w.owned[upgradeId] = (w.owned[upgradeId] || 0) + 1;
     applyUpgradeEffect(def.effect);
     w.costs[upgradeId] = Math.floor(cost * 1.25);
+    renderShop();  // aktualizuj ceny v shopu
     update();
   }
 
+  // Kliknutí na tlačítko Click
   function clickMoney() {
-    state.money += state.clickPower * state.boost * state.prestigeCash;
+    const gain = state.clickPower * state.boost * state.prestigeCash;
+    state.money += gain;
     state.stats.clicks += 1;
+    state.stats.totalEarned += gain;
+    state.stats.maxMoney = Math.max(state.stats.maxMoney, state.money);
 
-    if (Math.random() < (0.001 * state.gemLuck)) {
+    // Náhodná šance na gem
+    if (Math.random() < 0.001 * state.gemLuck) {
       state.gems += 1;
       state.stats.gemsFound += 1;
       showMessage("💎 Našel jsi gem!");
     }
-
+    // Náhodné události (test, ředitel)
     if (Math.random() < 0.01) {
       state.stats.tests += 1;
       if (Math.random() < 0.5) {
@@ -666,20 +530,18 @@ body{
         showMessage("🏫 Ředitel je nemocný: +10 % peněz.");
       }
     }
-
+    // Šance na párty (bonus gemů)
     if (Math.random() < 0.0001) {
-      state.gems += 3;
       state.stats.parties += 1;
-      const r = Math.random();
-      if (r < 0.5) {
-        state.gems += 0;
+      if (Math.random() < 0.5) {
+        state.gems += 3;
         showMessage("🎉 Studentská párty! +3 💎");
-      } else if (r < 0.8) {
-        state.gems += 2;
+      } else if (Math.random() < 0.8) {
+        state.gems += 5;
         showMessage("🎉 Studentská párty! +5 💎");
       } else {
-        state.gems += 9;
-        showMessage("🎉 Legedární párty! +12 💎");
+        state.gems += 12;
+        showMessage("🎉 Legendární párty! +12 💎");
       }
     }
 
@@ -687,34 +549,21 @@ body{
     update();
   }
 
+  // Přeskok času (Time Skip) z Gem Shopu
   function buyTimeSkip(seconds, cost) {
     if (state.gems < cost) {
       showMessage("Nemáš dost gemů.");
       return;
     }
     state.gems -= cost;
-    state.money += state.perSecond * state.boost * state.prestigeCash * seconds;
+    const gain = state.perSecond * state.boost * state.prestigeCash * seconds;
+    state.money += gain;
+    state.stats.totalEarned += gain;
+    state.stats.maxMoney = Math.max(state.stats.maxMoney, state.money);
     update();
   }
 
-  let boostSeq = 1;
-  function addTimedBoost(mult, durationMs) {
-    const id = `${Date.now()}_${boostSeq++}`;
-    state.activeBoosts.push({
-      id,
-      mult,
-      expiresAt: Date.now() + durationMs
-    });
-    purgeExpiredBoosts();
-    updateStats();
-
-    setTimeout(() => {
-      state.activeBoosts = state.activeBoosts.filter(b => b.id !== id);
-      purgeExpiredBoosts();
-      updateStats();
-    }, durationMs + 20);
-  }
-
+  // Cash boost (2x nebo 3x)
   function buyBoost(mult, durationSec, cost) {
     if (state.gems < cost) {
       showMessage("Nemáš dost gemů.");
@@ -722,16 +571,29 @@ body{
     }
     state.gems -= cost;
     const now = Date.now();
-    // Check for existing boost with same multiplier
-    let existing = state.activeBoosts.find(b => Number(b.mult) === mult && Number(b.expiresAt) > now);
-    if (existing) {
-      existing.expiresAt += durationSec * 1000;
-      showMessage(`💸 Cash boost x${mult} prodloužen!`);
+    if (state.cashBoostActive && state.cashBoostActive.expiresAt > now) {
+      // Buď prodloužit, nebo nahradit
+      if (state.cashBoostActive.mult === mult) {
+        state.cashBoostActive.expiresAt += durationSec*1000;
+      } else if (mult > state.cashBoostActive.mult) {
+        state.cashBoostActive.mult = mult;
+        state.cashBoostActive.expiresAt = now + durationSec*1000;
+      }
     } else {
-      addTimedBoost(mult, durationSec * 1000);
+      state.cashBoostActive = { mult: mult, expiresAt: now + durationSec*1000 };
     }
+    // Nastav timeout na konec boostu
+    clearTimeout(state.cashBoostActive.timeoutId);
+    state.cashBoostActive.timeoutId = setTimeout(() => {
+      state.cashBoostActive = null;
+      state.boost = 1;
+      update();
+    }, state.cashBoostActive.expiresAt - now + 50);
+    state.boost = state.cashBoostActive.mult;
+    update();
   }
 
+  // Gem Luck boost (x10 nebo x20)
   function buyGemLuck(mult, durationSec, cost) {
     if (state.gems < cost) {
       showMessage("Nemáš dost gemů.");
@@ -739,120 +601,80 @@ body{
     }
     state.gems -= cost;
     const now = Date.now();
-    // If an active gem boost exists
-    if (state.activeGemBoost && state.activeGemBoost.expiresAt > now) {
-      // Same multiplier extends duration, higher replaces, lower ignored
-      if (state.activeGemBoost.mult === mult) {
-        state.activeGemBoost.expiresAt += durationSec * 1000;
-        showMessage(`💎 Gem Luck x${mult} prodloužen!`);
-      } else if (mult > state.activeGemBoost.mult) {
-        state.activeGemBoost.mult = mult;
-        state.activeGemBoost.expiresAt = now + durationSec * 1000;
-        showMessage(`💎 Gem Luck přepnuta na x${mult}!`);
+    if (state.gemLuckActive && state.gemLuckActive.expiresAt > now) {
+      if (state.gemLuckActive.mult === mult) {
+        state.gemLuckActive.expiresAt += durationSec*1000;
       } else {
-        // lower multiplier purchased: ignore
-        showMessage("💎 Máš aktivní lepší Gem Luck boost.");
+        state.gemLuckActive.mult = mult;
+        state.gemLuckActive.expiresAt = now + durationSec*1000;
       }
     } else {
-      // No active boost, activate new
-      state.activeGemBoost = {
-        mult: mult,
-        expiresAt: now + durationSec * 1000
-      };
-      showMessage(`💎 Zakoupen Gem Luck x${mult}!`);
+      state.gemLuckActive = { mult: mult, expiresAt: now + durationSec*1000 };
+      state.gemLuck = mult;
     }
-    // Update gemLuck multiplier
-    state.gemLuck = state.activeGemBoost ? state.activeGemBoost.mult : 1;
-    updateStats();
-    // Setup expiration
-    setTimeout(() => {
-      if (state.activeGemBoost && Date.now() >= state.activeGemBoost.expiresAt) {
-        state.gemLuck = 1;
-        state.activeGemBoost = null;
-        showMessage("💎 Gem Luck skončil.");
-      }
+    clearTimeout(state.gemLuckActive.timeoutId);
+    state.gemLuckActive.timeoutId = setTimeout(() => {
+      state.gemLuckActive = null;
+      state.gemLuck = 1;
       update();
-    }, durationSec * 1000 + 20);
-  }
-
-  const PRESTIGE_COSTS=[1e12,1e13,1e14,1e15,1e16,3e17,9e18,2.7e20,8.1e21,2.43e23];
-  function buyPrestige(){
-    const lvl=state.prestige;
-    if(lvl>=10){showMessage("Max Prestige.");return;}
-    const cost=PRESTIGE_COSTS[lvl];
-    if(state.money<cost){showMessage("Potřebuješ více peněz.");return;}
-    state.prestige++;
-    if(state.prestige<=5) state.prestigeCash*=2.5;
-    else state.prestigeCash*=5;
-
-    state.money=0;
-    state.clickPower=1;
-    state.perSecond=0;
-    state.worlds={1:defaultWorldState(1),2:defaultWorldState(2),3:defaultWorldState(3),4:defaultWorldState(4),5:defaultWorldState(5)};
-    state.maxUnlockedWorld = 1;
-    state.currentWorld = 1;
-    showMessage("⭐ Prestige "+state.prestige+" dokončen!");
+    }, state.gemLuckActive.expiresAt - now + 50);
+    state.gemLuck = state.gemLuckActive.mult;
     update();
   }
 
-  window.buyPrestige=buyPrestige;
+  // Kódy pro Prow mode (nepoužívá se)
+  // window.buyDev = buyDev; // Odebráno
+
+  const PRESTIGE_COSTS = [1e12,1e13,1e14,1e15,1e16,3e17,9e18,2.7e20,8.1e21,2.43e23];
+  function buyPrestige(){
+    const lvl = state.prestige;
+    if (lvl >= 10) {
+      showMessage("Maximální úroveň Prestige.");
+      return;
+    }
+    const cost = PRESTIGE_COSTS[lvl];
+    if (state.money < cost) {
+      showMessage("Potřebuješ více peněz na prestiž.");
+      return;
+    }
+    state.prestige++;
+    // Zdvojnásobí se násobič peněz (vícenásobná 5× po 5. úrovni)
+    if (state.prestige <= 5) state.prestigeCash *= 2.5;
+    else state.prestigeCash *= 5;
+
+    // Reset stavu podobně jako nový začátek (vyčištění boostů, světů apod.)
+    state.money = 0;
+    state.clickPower = 1;
+    state.perSecond = 0;
+    state.boost = 1;
+    state.gemLuck = 1;
+    state.cashBoostActive = null;
+    state.gemLuckActive = null;
+    state.currentWorld = 1;
+    state.maxUnlockedWorld = 1;
+    state.worlds = { 1: defaultWorldState(1), 2: defaultWorldState(2), 3: defaultWorldState(3), 4: defaultWorldState(4) };
+    showMessage(`⭐ Prestige ${state.prestige} dokončen!`);
+    renderWorldControls();
+    renderShop();
+    update();
+  }
+
   window.handleWorldButton = handleWorldButton;
   window.buyUpgrade = buyUpgrade;
   window.clickMoney = clickMoney;
   window.buyTimeSkip = buyTimeSkip;
   window.buyBoost = buyBoost;
   window.buyGemLuck = buyGemLuck;
+  window.buyPrestige = buyPrestige;
 
-  window.addEventListener("beforeunload", saveState);
-
-  function resetSave() {
-    localStorage.removeItem(SAVE_KEY);
-    state = defaultState();
-    saveState();
-    updateStats();
-    showMessage("🔄 Hra byla resetována.");
-  }
-
-  function exportSave() {
-    const saveData = JSON.stringify(state);
-    // Put save data into textarea for copying
-    const area = document.getElementById("importArea");
-    if (area) {
-      area.value = saveData;
-      showMessage("📋 Save exportován (zkopíruj ho z pole).");
-    } else {
-      prompt("Zkopíruj tento JSON:", saveData);
-    }
-  }
-
-  function importSave() {
-    const area = document.getElementById("importArea");
-    let saveData = area ? area.value.trim() : null;
-    if (!saveData) {
-      showMessage("⚠️ Zadej JSON do políčka.");
-      return;
-    }
-    try {
-      JSON.parse(saveData);
-    } catch {
-      showMessage("⚠️ Neplatný JSON.");
-      return;
-    }
-    localStorage.setItem(SAVE_KEY, saveData);
-    showMessage("✅ Save importován! Reloaduji...");
-    setTimeout(() => location.reload(), 1000);
-  }
-
+  // Automatický příjem peněz každou sekundu
   setInterval(() => {
     state.money += state.perSecond * state.boost * state.prestigeCash;
-    purgeExpiredBoosts();
-    updateStats();
-    checkEndings();
-    saveState();
+    state.stats.totalEarned += state.perSecond * state.boost * state.prestigeCash;
+    state.stats.maxMoney = Math.max(state.stats.maxMoney, state.money);
+    update();
   }, 1000);
 
-  // Initial render
-  update();
 })();
 </script>
 </body>
